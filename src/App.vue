@@ -1,7 +1,10 @@
 <template>
   <div id="app">
-    <navigation />
-    <router-view/>
+    <navigation @search="handleSearch" />
+
+    <div id="wrapper">
+      <router-view :data="data" />
+    </div>
     <footer class="page-footer dark fixed-bottom">
         <div class="footer-copyright">
             <p>All content grabbed from Small Arms Illustrated</p>
@@ -11,11 +14,29 @@
 </template>
 
 <script>
-import Navigation from './components/Navigation.vue'
+import Navigation from './components/Navigation.vue';
+import DATA from './data.json';
+import _ from 'lodash';
 
 export default {
   components: {
     Navigation,
+  },
+  data() {
+     return {
+       data: DATA[ this.$route.meta.title ]
+     }
+  },
+  methods: {
+    handleSearch(e) {
+      const query = e.target.value;
+
+      this.data = _.fromPairs(
+        _.toPairs( DATA[ this.$route.meta.title ] )
+          .map(([country, cData]) => [country, cData.filter(cd => cd.items.join(',').toLowerCase().includes(query))])
+          .filter(([, cData]) => cData.length)
+        );
+    }
   }
 }
 </script>
@@ -27,11 +48,9 @@ export default {
   @import "/assets/fonts/simple-line-icons.min.css";
   @import "https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.10.0/baguetteBox.min.css";
   @import "/assets/css/smoothproducts.css";
-/* 
-  #app {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 100%;
-  }  */
+
+  #wrapper {
+    padding-top: 90px;
+    padding-bottom: 150px;
+  }
 </style>
